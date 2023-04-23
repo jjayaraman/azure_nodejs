@@ -13,10 +13,10 @@ export async function createProduct(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   context.log(`Http function processed request for url "${request.url}"`);
+  context.log(`request : ${JSON.stringify(request)}`);
 
   let product = request.body as unknown as Product;
 
-  context.log(`request : ${JSON.stringify(request)}`);
   context.log(`product : ${JSON.stringify(product)}`);
 
   let productItem: Product = {
