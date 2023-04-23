@@ -41,6 +41,7 @@ export async function getProducts(
 
 app.http('getProducts', {
   methods: ['GET'],
+  route: 'product/getall',
   authLevel: 'anonymous',
   handler: getProducts,
 });
