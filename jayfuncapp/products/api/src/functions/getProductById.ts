@@ -43,7 +43,7 @@ export async function getProductById(
 
 app.http('getProductById', {
   methods: ['GET'],
-  route: 'product/{id}',
+  route: 'product/getbyid/{id}',
   authLevel: 'anonymous',
   handler: getProductById,
 });
