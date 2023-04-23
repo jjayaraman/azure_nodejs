@@ -16,6 +16,7 @@ export async function createProduct(
 
   let product = request.body as unknown as Product;
 
+  context.log(`request : ${JSON.stringify(request)}`);
   context.log(`product : ${JSON.stringify(product)}`);
 
   let productItem: Product = {
@@ -39,7 +40,7 @@ export async function createProduct(
 
   const resource = await container.items.create(productItem);
 
-  context.log(`resource : ${JSON.stringify(resource)}`);
+  //   context.log(`resource : ${JSON.stringify(resource)}`);
   return {
     status: 201,
     body: JSON.stringify(resource),
