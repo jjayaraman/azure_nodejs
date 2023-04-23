@@ -16,6 +16,8 @@ export async function createProduct(
 
   let product = request.body as unknown as Product;
 
+  context.log(`product : ${JSON.stringify(product)}`);
+
   let productItem: Product = {
     id: uuid(),
     categoryName: product?.categoryName,
@@ -25,6 +27,8 @@ export async function createProduct(
     price: product?.price,
   };
 
+  context.log(`productItem : ${JSON.stringify(productItem)}`);
+
   const connectionString = process.env.CosmosDbConnectionString;
   const databaseId = process.env.COSMOS_DATABASE_ID;
   const containerId = process.env.COSMOS_CONTAINER_ID;
@@ -33,11 +37,15 @@ export async function createProduct(
   const database = client.database(databaseId);
   const container = database.container(containerId);
 
-  const { resource } = await container.items.create(productItem);
+  const resource = await container.items.create(productItem);
 
+  context.log(`resource : ${JSON.stringify(resource)}`);
   return {
     status: 201,
-    body: `New product created, ${JSON.stringify(resource)}`,
+    body: JSON.stringify(resource),
+    headers: {
+      'content-type': 'application/json',
+    },
   };
 }
 
