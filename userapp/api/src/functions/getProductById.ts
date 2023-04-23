@@ -2,6 +2,7 @@ import { CosmosClient, SqlQuerySpec } from '@azure/cosmos';
 import {
   app,
   HttpRequest,
+  HttpResponse,
   HttpResponseInit,
   InvocationContext,
 } from '@azure/functions';
@@ -26,12 +27,19 @@ export async function getProductById(
     query: 'SELECT * FROM c where c.id = @id',
     parameters: [{ name: '@id', value: id }],
   };
-  const result = await container.items.query(querySpec).fetchAll();
-  return { body: JSON.stringify(result) };
+  const { resources } = await container.items.query(querySpec).fetchAll();
+
+  let response = {
+    body: JSON.stringify(resources),
+    headers: {
+      'content-type': 'application/json',
+    },
+  };
+  return response;
 }
 
 app.http('getProductById', {
-  methods: ['GET', 'POST'],
+  methods: ['GET'],
   authLevel: 'anonymous',
   handler: getProductById,
 });

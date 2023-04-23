@@ -30,7 +30,13 @@ export async function getUsers(
   };
   const { resources } = await container.items.query(querySpec).fetchAll();
 
-  return { body: JSON.stringify(resources) };
+  let response = {
+    body: JSON.stringify(resources),
+    headers: {
+      'content-type': 'application/json',
+    },
+  };
+  return response;
 }
 
 app.http('getUsers', {
