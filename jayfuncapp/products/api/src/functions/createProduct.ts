@@ -14,6 +14,7 @@ export async function createProduct(
 ): Promise<HttpResponseInit> {
   context.log(`Http function processed request for url "${request.url}"`);
   context.log(`request : ${JSON.stringify(request)}`);
+  context.log(`context : ${JSON.stringify(context)}`);
 
   let product = request.body as unknown as Product;
 
