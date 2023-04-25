@@ -18,7 +18,7 @@ export async function createProduct(
 
   let product = request.body as unknown as Product;
 
-  context.log(`product : ${JSON.stringify(product)}`);
+  // context.log(`product : ${JSON.stringify(product)}`);
 
   let productItem: Product = {
     id: uuid(),
@@ -29,7 +29,7 @@ export async function createProduct(
     price: product?.price,
   };
 
-  context.log(`productItem : ${JSON.stringify(productItem)}`);
+  // context.log(`productItem : ${JSON.stringify(productItem)}`);
 
   const connectionString = process.env.CosmosDbConnectionString;
   const databaseId = process.env.COSMOS_DATABASE_ID;
