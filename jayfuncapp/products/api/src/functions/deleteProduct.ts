@@ -24,26 +24,32 @@ export async function deleteProduct(
     const container = database.container(containerId);
 
     const id = request.query.get('id') || request.params.id;
+    context.log(`id : ${id}`);
 
     const querySpec: SqlQuerySpec = {
       query: 'SELECT * FROM c where c.id = @id',
       parameters: [{ name: '@id', value: id }],
     };
     const { resources } = await container.items.query(querySpec).fetchAll();
-
-    context.log(`loaded : ${JSON.stringify(resources)}`);
-
     const product = resources[0] as Product;
-    context.log(`product loaded : ${JSON.stringify(product)}`);
+    context.log(`product id : ${product?.id}`);
+    context.log(`product categoryId : ${product?.categoryId}`);
     deleted = await container.item(product?.id, product?.categoryId).delete();
 
     context.log(`deleted : ${deleted}`);
   } catch (error) {
     context.log(`Error: ${error}`);
+    return {
+      status: 400,
+      body: 'Failed to delete',
+      headers: {
+        'content-type': 'application/json',
+      },
+    };
   }
   return {
     status: 200,
-    body: JSON.stringify(deleted),
+    body: 'Deleted successfully',
     headers: {
       'content-type': 'application/json',
     },
