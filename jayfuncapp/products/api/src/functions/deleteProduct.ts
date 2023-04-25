@@ -43,7 +43,8 @@ export async function deleteProduct(
 }
 
 app.http('deleteProduct', {
-  methods: ['GET', 'POST'],
+  methods: ['DELETE'],
+  route: 'product/delete/{id}',
   authLevel: 'anonymous',
   handler: deleteProduct,
 });
