@@ -29,6 +29,8 @@ export async function deleteProduct(
   };
   const { resources } = await container.items.query(querySpec).fetchAll();
 
+  context.log(`loaded : ${JSON.stringify(resources)}`);
+
   const product = resources[0] as Product;
   const deleted = await container.item(product.id, product.categoryId).delete();
 
