@@ -16,9 +16,10 @@ export const createProduct = async (
   context.log(`request : ${JSON.stringify(request)}`)
   context.log(`context : ${JSON.stringify(context)}`)
   context.log(`body : ${JSON.stringify(request.body)}`)
+  context.log(`body : ${JSON.stringify(request.json())}`)
 
   try {
-    let product = request.body as unknown as Product
+    let product = request.json() as unknown as Product
 
     context.log(`product : ${JSON.stringify(product)}`)
 
@@ -44,10 +45,10 @@ export const createProduct = async (
 
     const resource = await container.items.create(productItem)
 
-    //   context.log(`resource : ${JSON.stringify(resource)}`);
+    context.log(`resource : ${JSON.stringify(resource)}`)
     return {
       status: 201,
-      body: JSON.stringify('xxx'),
+      body: JSON.stringify(resource),
       headers: {
         'content-type': 'application/json',
       },
