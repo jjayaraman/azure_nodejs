@@ -5,7 +5,7 @@ import {
   InvocationContext,
 } from '@azure/functions'
 import Product from '../model/product'
-import { CosmosClient } from '@azure/cosmos'
+import { CosmosClient, ItemDefinition } from '@azure/cosmos'
 import { v4 as uuid } from 'uuid'
 import { stringify } from 'flatted'
 
@@ -14,16 +14,11 @@ export async function createProduct(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   context.info(`Http function processed request for url "${request.url}"`)
-  // context.debug(`request : ${JSON.stringify(request)}`)
-  // context.debug(`context : ${JSON.stringify(context)}`)
-  // context.debug(`body : ${JSON.stringify(request.json())}`)
-
   try {
-    let product = (await request.json()) as Product
-
-    context.log(`product : ${stringify(product)}`)
-
-    let productItem: Product = {
+    let body = await request.json()
+    const product = body as Product
+    context.log(`product : ${JSON.stringify(body)}`)
+    let productItem = {
       id: uuid(),
       categoryId: uuid(),
       categoryName: product?.categoryName,
@@ -33,7 +28,7 @@ export async function createProduct(
       price: product?.price,
     }
 
-    // context.log(`productItem : ${JSON.stringify(productItem)}`);
+    context.log(`productItem : ${JSON.stringify(productItem)}`)
 
     const connectionString = process.env.CosmosDbConnectionString
     const databaseId = process.env.COSMOS_DATABASE_ID
@@ -43,12 +38,10 @@ export async function createProduct(
     const database = client.database(databaseId)
     const container = database.container(containerId)
 
-    const result = await container.items.create(productItem)
-
-    context.debug(`resource : ${stringify(result)}`)
+    const { resource } = await container.items.create(productItem)
     return {
       status: 201,
-      body: stringify(result),
+      body: `${resource.name} inserted successfully`,
       headers: {
         'content-type': 'application/json',
       },
