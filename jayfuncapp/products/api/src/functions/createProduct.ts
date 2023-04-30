@@ -13,10 +13,9 @@ export async function createProduct(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   context.info(`Http function processed request for url "${request.url}"`)
-  context.debug(`request : ${JSON.stringify(request)}`)
-  context.debug(`context : ${JSON.stringify(context)}`)
-  context.debug(`body : ${JSON.stringify(request.body)}`)
-  context.debug(`body : ${JSON.stringify(request.json())}`)
+  // context.debug(`request : ${JSON.stringify(request)}`)
+  // context.debug(`context : ${JSON.stringify(context)}`)
+  // context.debug(`body : ${JSON.stringify(request.json())}`)
 
   try {
     let product = request.json() as unknown as Product
