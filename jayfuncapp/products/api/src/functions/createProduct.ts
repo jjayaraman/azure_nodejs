@@ -7,6 +7,7 @@ import {
 import Product from '../model/product'
 import { CosmosClient } from '@azure/cosmos'
 import { v4 as uuid } from 'uuid'
+import { stringify } from 'flatted'
 
 export async function createProduct(
   request: HttpRequest,
@@ -42,12 +43,12 @@ export async function createProduct(
     const database = client.database(databaseId)
     const container = database.container(containerId)
 
-    const { item } = await container.items.create(productItem)
+    const result = await container.items.create(productItem)
 
-    // context.debug(`resource : ${JSON.stringify(resource)}`)
+    context.debug(`resource : ${stringify(result)}`)
     return {
       status: 201,
-      body: JSON.stringify(item),
+      body: stringify(result),
       headers: {
         'content-type': 'application/json',
       },
