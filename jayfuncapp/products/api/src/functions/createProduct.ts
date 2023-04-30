@@ -8,20 +8,20 @@ import Product from '../model/product'
 import { CosmosClient } from '@azure/cosmos'
 import { v4 as uuid } from 'uuid'
 
-export const createProduct = async (
+export async function createProduct(
   request: HttpRequest,
   context: InvocationContext
-): Promise<HttpResponseInit> => {
-  context.log(`Http function processed request for url "${request.url}"`)
-  context.log(`request : ${JSON.stringify(request)}`)
-  context.log(`context : ${JSON.stringify(context)}`)
-  context.log(`body : ${JSON.stringify(request.body)}`)
-  context.log(`body : ${JSON.stringify(request.json())}`)
+): Promise<HttpResponseInit> {
+  context.info(`Http function processed request for url "${request.url}"`)
+  context.debug(`request : ${JSON.stringify(request)}`)
+  context.debug(`context : ${JSON.stringify(context)}`)
+  context.debug(`body : ${JSON.stringify(request.body)}`)
+  context.debug(`body : ${JSON.stringify(request.json())}`)
 
   try {
     let product = request.json() as unknown as Product
 
-    context.log(`product : ${JSON.stringify(product)}`)
+    // context.log(`product : ${JSON.stringify(product)}`)
 
     let productItem: Product = {
       id: uuid(),
@@ -45,7 +45,7 @@ export const createProduct = async (
 
     const resource = await container.items.create(productItem)
 
-    context.log(`resource : ${JSON.stringify(resource)}`)
+    // context.debug(`resource : ${JSON.stringify(resource)}`)
     return {
       status: 201,
       body: JSON.stringify(resource),
@@ -54,7 +54,7 @@ export const createProduct = async (
       },
     }
   } catch (error) {
-    context.log(`Error creating product item: ${error}`)
+    context.error(`Error creating product item: ${error}`)
   }
 }
 
