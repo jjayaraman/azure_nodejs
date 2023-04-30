@@ -42,18 +42,25 @@ export async function createProduct(
     const database = client.database(databaseId)
     const container = database.container(containerId)
 
-    const resource = await container.items.create(productItem)
+    const { item } = await container.items.create(productItem)
 
     // context.debug(`resource : ${JSON.stringify(resource)}`)
     return {
       status: 201,
-      body: JSON.stringify(resource),
+      body: JSON.stringify(item),
       headers: {
         'content-type': 'application/json',
       },
     }
   } catch (error) {
     context.error(`Error creating product item: ${error}`)
+    return {
+      status: 400,
+      body: `Error creating product item: ${error}`,
+      headers: {
+        'content-type': 'application/json',
+      },
+    }
   }
 }
 
