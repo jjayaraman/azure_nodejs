@@ -46,7 +46,7 @@ export async function updateProduct(
 
 app.http('updateProduct', {
   methods: ['PUT'],
-  route: '/product/update',
+  route: 'product/update',
   authLevel: 'anonymous',
   handler: updateProduct,
 })
