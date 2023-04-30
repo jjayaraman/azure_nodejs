@@ -36,17 +36,26 @@ export async function deleteProduct(
     context.log(`product categoryId : ${product?.categoryId}`)
     if (product?.id) {
       deleted = await container.item(product?.id, product?.categoryId).delete()
+      const msg = `Product ${product?.id} deleted successfully`
+      context.info(msg)
+      return {
+        status: 200,
+        body: msg,
+        headers: {
+          'content-type': 'application/json',
+        },
+      }
     } else {
+      const msg = `No product found for the given id ${product?.id} and not deleted`
+      context.info(msg)
       return {
         status: 204,
-        body: 'No product found for the given id and not deleted',
+        body: msg,
         headers: {
           'content-type': 'application/json',
         },
       }
     }
-
-    context.log(`deleted : ${deleted}`)
   } catch (error) {
     context.log(`Error: ${error}`)
     return {
@@ -56,13 +65,6 @@ export async function deleteProduct(
         'content-type': 'application/json',
       },
     }
-  }
-  return {
-    status: 200,
-    body: 'Deleted successfully',
-    headers: {
-      'content-type': 'application/json',
-    },
   }
 }
 
