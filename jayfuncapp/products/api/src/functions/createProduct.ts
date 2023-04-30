@@ -19,9 +19,9 @@ export async function createProduct(
   // context.debug(`body : ${JSON.stringify(request.json())}`)
 
   try {
-    let product = request.json() as unknown as Product
+    let product = (await request.json()) as Product
 
-    // context.log(`product : ${JSON.stringify(product)}`)
+    context.log(`product : ${stringify(product)}`)
 
     let productItem: Product = {
       id: uuid(),
