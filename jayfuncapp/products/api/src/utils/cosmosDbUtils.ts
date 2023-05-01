@@ -29,3 +29,16 @@ export const getById = async (id: string): Promise<any> => {
   };
   return await container.items.query(querySpec).fetchAll();
 };
+
+/**
+ * Get all items but restrict with the given limit
+ *
+ * @param limit
+ * @returns
+ */
+export const getAllWithLimit = async (limit: number) => {
+  const querySpec: SqlQuerySpec = {
+    query: `SELECT * FROM c LIMIT ${limit}`,
+  };
+  return await container.items.query(querySpec).fetchAll();
+};
