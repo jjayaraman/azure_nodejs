@@ -5,10 +5,8 @@ import {
   InvocationContext,
 } from "@azure/functions";
 import Product from "../model/product";
-import { CosmosClient, ItemDefinition } from "@azure/cosmos";
 import { v4 as uuid } from "uuid";
-import { create } from "../utils/cosmosDbUtils";
-
+import { createItem } from "../utils/cosmosDbUtils";
 
 export async function createProduct(
   request: HttpRequest,
@@ -19,7 +17,7 @@ export async function createProduct(
     let body = await request.json();
     const product = body as Product;
     context.log(`product : ${JSON.stringify(body)}`);
-    
+
     let productItem = {
       id: uuid(),
       categoryId: uuid(),
@@ -32,16 +30,8 @@ export async function createProduct(
 
     context.log(`productItem : ${JSON.stringify(productItem)}`);
 
-    // const connectionString = process.env.CosmosDbConnectionString
-    // const databaseId = process.env.COSMOS_DATABASE_ID
-    // const containerId = process.env.COSMOS_CONTAINER_ID
+    const { resource } = await createItem<Product>(productItem);
 
-    // const client = new CosmosClient(connectionString)
-    // const database = client.database(databaseId)
-    // const container = database.container(containerId)
-
-    // const { resource } = await container.items.create(productItem)
-    const { resource } = await create<Product>(productItem);
     return {
       status: 201,
       body: `Product ${productItem.id} inserted successfully`,
