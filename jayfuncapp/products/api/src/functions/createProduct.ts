@@ -3,20 +3,23 @@ import {
   HttpRequest,
   HttpResponseInit,
   InvocationContext,
-} from '@azure/functions'
-import Product from '../model/product'
-import { CosmosClient, ItemDefinition } from '@azure/cosmos'
-import { v4 as uuid } from 'uuid'
+} from "@azure/functions";
+import Product from "../model/product";
+import { CosmosClient, ItemDefinition } from "@azure/cosmos";
+import { v4 as uuid } from "uuid";
+import { create } from "../utils/cosmosDbUtils";
+
 
 export async function createProduct(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
-  context.info(`Http function processed request for url "${request.url}"`)
+  context.info(`Http function processed request for url "${request.url}"`);
   try {
-    let body = await request.json()
-    const product = body as Product
-    context.log(`product : ${JSON.stringify(body)}`)
+    let body = await request.json();
+    const product = body as Product;
+    context.log(`product : ${JSON.stringify(body)}`);
+    
     let productItem = {
       id: uuid(),
       categoryId: uuid(),
@@ -25,41 +28,42 @@ export async function createProduct(
       name: product?.name,
       description: product?.description,
       price: product?.price,
-    }
+    };
 
-    context.log(`productItem : ${JSON.stringify(productItem)}`)
+    context.log(`productItem : ${JSON.stringify(productItem)}`);
 
-    const connectionString = process.env.CosmosDbConnectionString
-    const databaseId = process.env.COSMOS_DATABASE_ID
-    const containerId = process.env.COSMOS_CONTAINER_ID
+    // const connectionString = process.env.CosmosDbConnectionString
+    // const databaseId = process.env.COSMOS_DATABASE_ID
+    // const containerId = process.env.COSMOS_CONTAINER_ID
 
-    const client = new CosmosClient(connectionString)
-    const database = client.database(databaseId)
-    const container = database.container(containerId)
+    // const client = new CosmosClient(connectionString)
+    // const database = client.database(databaseId)
+    // const container = database.container(containerId)
 
-    const { resource } = await container.items.create(productItem)
+    // const { resource } = await container.items.create(productItem)
+    const { resource } = await create<Product>(productItem);
     return {
       status: 201,
       body: `Product ${productItem.id} inserted successfully`,
       headers: {
-        'content-type': 'application/json',
+        "content-type": "application/json",
       },
-    }
+    };
   } catch (error) {
-    context.error(`Error creating product item: ${error}`)
+    context.error(`Error creating product item: ${error}`);
     return {
       status: 400,
       body: `Error creating product item: ${error}`,
       headers: {
-        'content-type': 'application/json',
+        "content-type": "application/json",
       },
-    }
+    };
   }
 }
 
-app.http('createProduct', {
-  methods: ['POST'],
-  route: 'product/create',
-  authLevel: 'anonymous',
+app.http("createProduct", {
+  methods: ["POST"],
+  route: "product/create",
+  authLevel: "anonymous",
   handler: createProduct,
-})
+});
