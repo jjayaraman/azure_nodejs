@@ -16,7 +16,6 @@ export async function getProductById(
   const id = request.query.get("id") || request.params.id;
   const pathId = request.params.id;
   context.log(`id: ${id}`);
-  context.log(`pathId: ${pathId}`);
 
   // const connectionString = process.env.CosmosDbConnectionString;
   // const databaseId = process.env.COSMOS_DATABASE_ID;

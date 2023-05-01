@@ -36,9 +36,18 @@ export const getById = async (id: string): Promise<any> => {
  * @param limit
  * @returns
  */
-export const getAllWithLimit = async (limit: number) => {
+export const getAllItemsWithLimit = async (limit: number) => {
   const querySpec: SqlQuerySpec = {
-    query: `SELECT * FROM c LIMIT ${limit}`,
+    query: `SELECT * FROM c OFFSET 0 LIMIT ${limit}`,
   };
   return await container.items.query(querySpec).fetchAll();
+};
+
+/**
+ * Update the given item
+ * @param item
+ * @returns
+ */
+export const updateItem = async <T>(item: T) => {
+  return await container.items.upsert<T>(item);
 };

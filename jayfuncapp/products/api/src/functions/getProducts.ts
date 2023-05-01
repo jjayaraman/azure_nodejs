@@ -5,7 +5,7 @@ import {
   HttpResponseInit,
   InvocationContext,
 } from "@azure/functions";
-import { getAllWithLimit } from "../utils/cosmosDbUtils";
+import { getAllItemsWithLimit } from "../utils/cosmosDbUtils";
 
 export async function getProducts(
   request: HttpRequest,
@@ -31,7 +31,7 @@ export async function getProducts(
   // };
   // const { resources } = await container.items.query(querySpec).fetchAll();
 
-  const { resources } = await getAllWithLimit(10);
+  const { resources } = await getAllItemsWithLimit(10);
 
   let response = {
     body: JSON.stringify(resources),
