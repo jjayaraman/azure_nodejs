@@ -9,7 +9,7 @@ const getClient = () => {
   return client
 }
 
-const createSecret = async (secretName: string, secretValue: string) => {
+export const createSecret = async (secretName: string, secretValue: string) => {
   const client = await getClient()
   const result = await client.setSecret(secretName, secretValue)
   if (result) {
@@ -17,7 +17,7 @@ const createSecret = async (secretName: string, secretValue: string) => {
   }
 }
 
-const getSecretValue = async (secretName: string) => {
+export const getSecretValue = async (secretName: string) => {
   // Read the secret we created
   const client = await getClient()
   const secret = await client.getSecret(secretName)
@@ -25,7 +25,7 @@ const getSecretValue = async (secretName: string) => {
   return secret
 }
 
-const deleteSecret = async (secretName: string) => {
+export const deleteSecret = async (secretName: string) => {
   const client = await getClient()
   await client.beginDeleteSecret(secretName)
   console.log(`Secret deleted for secretName: ${secretName}`)
