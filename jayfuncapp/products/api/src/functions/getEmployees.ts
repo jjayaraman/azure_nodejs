@@ -13,7 +13,7 @@ export async function getEmployees(
 
   const name = request.query.get("name") || (await request.text()) || "world";
 
-  return { body: `Get employeesss, ${name}!` };
+  return { body: `Get employees, ${name}!` };
 }
 
 app.http("getEmployees", {
