@@ -8,11 +8,11 @@ on:
     branches:
       - main
     paths: 
-      - functionapp/hellofuncapp/**
+      - functionapp/hellofuncapp123/**
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: './functionapp/hellofuncapp' # set this to the path to your web app project, defaults to the repository root
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: './functionapp/hellofuncapp123' # set this to the path to your web app project, defaults to the repository root
   NODE_VERSION: '18.x' # set this to the node version to use (supports 8.x, 10.x, 12.x)
 
 jobs:
