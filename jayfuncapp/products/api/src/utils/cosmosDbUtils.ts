@@ -1,11 +1,13 @@
 import { CosmosClient, SqlQuerySpec } from '@azure/cosmos'
 
-const connectionString = process.env.CosmosDbConnectionString
-let databaseId = process.env.COSMOS_DATABASE_ID
-let containerId = process.env.COSMOS_CONTAINER_ID
+// let connectionString = process.env.CosmosDbConnectionString
+// let databaseId = process.env.COSMOS_DATABASE_ID
+// let containerId = process.env.COSMOS_CONTAINER_ID
 
-databaseId = 'mydb'
-containerId = 'mycontainer'
+// For 2nd CosmosDB connection
+let connectionString = process.env.CosmosDbConnectionString2
+let databaseId = 'mydb'
+let containerId = 'mycontainer'
 
 const client = new CosmosClient(connectionString)
 const database = client.database(databaseId)
