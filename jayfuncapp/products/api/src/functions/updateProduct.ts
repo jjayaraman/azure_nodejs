@@ -21,11 +21,6 @@ export async function updateProduct(
 
     const product = (await request.json()) as Product;
 
-    // const client = new CosmosClient(connectionString)
-    // const db = client.database(databaseId)
-    // const container = db.container(containerId)
-
-    // const { resource } = await container.items.upsert(product)
     const { resource } = await updateItem(product);
     return {
       status: 201,
