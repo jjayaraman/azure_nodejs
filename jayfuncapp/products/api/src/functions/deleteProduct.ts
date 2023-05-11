@@ -20,7 +20,6 @@ export async function deleteProduct(
     // const databaseId = process.env.COSMOS_DATABASE_ID;
     // const containerId = process.env.COSMOS_CONTAINER_ID;
 
-
     // For 2nd CosmosDB connection
     let connectionString = process.env.CosmosDbConnectionString2;
     let databaseId = "mydb";
@@ -42,7 +41,8 @@ export async function deleteProduct(
     context.log(`product id : ${product?.id}`);
     context.log(`product categoryId : ${product?.categoryId}`);
     if (product?.id) {
-      deleted = await container.item(product?.id, product?.categoryId).delete();
+      // deleted = await container.item(product?.id, product?.categoryId).delete();
+      deleted = await container.item(product?.id).delete();
       const msg = `Product ${product?.id} deleted successfully`;
       context.info(msg);
       return {
