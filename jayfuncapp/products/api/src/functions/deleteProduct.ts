@@ -42,7 +42,7 @@ export async function deleteProduct(
     context.log(`product categoryId : ${product?.categoryId}`);
     if (product?.id) {
       // deleted = await container.item(product?.id, product?.categoryId).delete();
-      deleted = await container.item(product?.id).delete();
+      deleted = await container.item(product?.id, product?.id).delete();
       const msg = `Product ${product?.id} deleted successfully`;
       context.info(msg);
       return {
