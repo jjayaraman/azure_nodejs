@@ -78,6 +78,11 @@ resource "azurerm_api_management_api_operation" "product_api_getbyid" {
   display_name        = "Get product by id"
   description         = "This API is used to get a product by id"
   url_template        = "/getbyid/{id}"
+  template_parameter {
+    name = "id"
+    required = true
+    type = "string"
+  }
 
   response {
     status_code = 200
