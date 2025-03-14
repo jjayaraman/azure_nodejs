@@ -5,8 +5,8 @@ export async function githubWebhookListener(request: HttpRequest, context: Invoc
   context.log(`Received request ctx log: ${JSON.stringify(request)}`)
   context.log(`Http function processed request for url "${request.url}"`)
 
-  request.headers.get('x-github-event')
-  request.headers.get('x-hub-signature')
+  // request.headers.get('x-github-event')
+  // request.headers.get('x-hub-signature')
 
   const githubData = request.body || `No data received from GitHub`
   context.log(`Received data from GitHub: ${JSON.stringify(githubData)}`)
@@ -21,7 +21,7 @@ export async function githubWebhookListener(request: HttpRequest, context: Invoc
 }
 
 app.http('githubWebhookListener', {
-  methods: ['GET', 'POST'],
+  methods: ['POST'],
   authLevel: 'anonymous',
   route: 'githubwebhooklistener',
   handler: githubWebhookListener,
