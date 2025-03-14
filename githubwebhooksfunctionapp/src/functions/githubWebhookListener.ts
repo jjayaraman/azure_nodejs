@@ -16,9 +16,7 @@ export async function githubWebhookListener(request: HttpRequest, context: Invoc
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   }
-
   context.log(`Sending response: ${JSON.stringify(response)}`)
-
   return response
 }
 
