@@ -37,6 +37,13 @@ resource "azurerm_subnet" "apim_subnet" {
 
 }
 
+resource "azurerm_subnet" "vm_subnet" {
+  name                 = "vm-subnet"
+  resource_group_name  = azurerm_resource_group.network_rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.2.0/26"]
+
+}
 
 resource "azurerm_network_security_group" "nsg_apim" {
   name                = "nsg_apim"
@@ -101,29 +108,68 @@ resource "azurerm_subnet_network_security_group_association" "apim_subnet_nsg_as
 
 
 
-resource "azurerm_public_ip" "pip-apim" {
-  name                = "pip-apim"
-  resource_group_name = azurerm_resource_group.network_rg.name
+# resource "azurerm_public_ip" "pip-apim" {
+#   name                = "pip-apim"
+#   resource_group_name = azurerm_resource_group.network_rg.name
+#   location            = azurerm_resource_group.network_rg.location
+#   allocation_method   = "Static"
+#   domain_name_label   = "pip-apim"
+#   sku                 = "Standard"
+# }
+
+
+# resource "azurerm_api_management" "apim" {
+#   name                = "jjay-apim"
+#   location            = azurerm_resource_group.network_rg.location
+#   resource_group_name = azurerm_resource_group.network_rg.name
+#   publisher_name      = "Jay Company"
+#   publisher_email     = "india.jai@gmail.com"
+
+#   sku_name = "Developer_1"
+
+#   public_ip_address_id = azurerm_public_ip.pip-apim.id
+#   virtual_network_type = "Internal"
+
+#   virtual_network_configuration {
+#     subnet_id = azurerm_subnet.apim_subnet.id
+#   }
+# }
+
+
+resource "azurerm_network_interface" "nic-vm" {
+  name                = "nic-vm"
   location            = azurerm_resource_group.network_rg.location
-  allocation_method   = "Static"
-  domain_name_label   = "pip-apim"
-  sku                 = "Standard"
-}
-
-
-resource "azurerm_api_management" "apim" {
-  name                = "jjay-apim"
-  location            = azurerm_resource_group.network_rg.location
   resource_group_name = azurerm_resource_group.network_rg.name
-  publisher_name      = "Jay Company"
-  publisher_email     = "india.jai@gmail.com"
 
-  sku_name = "Developer_1"
-
-  public_ip_address_id = azurerm_public_ip.pip-apim.id
-  virtual_network_type = "Internal"
-
-  virtual_network_configuration {
-    subnet_id = azurerm_subnet.apim_subnet.id
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.vm_subnet.id
+    private_ip_address_allocation = "Dynamic"
   }
 }
+
+resource "azurerm_windows_virtual_machine" "vm-windows" {
+  name                = "vm-windows"
+  resource_group_name = azurerm_resource_group.network_rg.name
+  location            = azurerm_resource_group.network_rg.location
+  size                = "Standard_B1s"
+  admin_username      = "adminuser"
+  admin_password      = "Password123!"
+  network_interface_ids = [
+    azurerm_network_interface.nic-vm.id,
+  ]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "MicrosoftWindowsDesktop"
+    offer     = "Windows-10"
+    sku       = "win10-22h2-pro-g2"
+    version   = "latest"
+  }
+}
+
+
