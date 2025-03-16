@@ -1,4 +1,4 @@
-import { HttpRequest, InvocationContext } from '@azure/functions'
+import { InvocationContext } from '@azure/functions'
 import { createHmac, timingSafeEqual } from 'crypto'
 
 /**
