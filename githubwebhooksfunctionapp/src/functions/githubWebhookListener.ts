@@ -42,7 +42,7 @@ export async function githubWebhookListener(request: HttpRequest, context: Invoc
     }
 
     const githubData = JSON.parse(payload) || `No data received from GitHub`
-    // context.log(`Received data from GitHub: ${JSON.stringify(githubData)}`)
+    context.log(`Received data from GitHub: ${JSON.stringify(githubData)}`)
     // Do the business logic with the data received from GitHub, as needed.
 
     // Respond back to Gitub with a message to the webhook event
