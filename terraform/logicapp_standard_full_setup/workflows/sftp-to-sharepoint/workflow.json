@@ -1,0 +1,76 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2019-05-01/workflowDefinition.json#",
+    "actions": {
+      "Get_file_content": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@appsetting('sftp_connection_name')"
+            }
+          },
+          "method": "get",
+          "path": "/datasets/default/files/@{triggerOutputs()?['headers']['x-ms-file-id']}/content"
+        },
+        "runAfter": {}
+      },
+      "Upload_to_SharePoint": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@appsetting('sharepoint_connection_name')"
+            }
+          },
+          "method": "post",
+          "path": "/datasets/default/files",
+          "body": {
+            "folderPath": "/Shared Documents",
+            "name": "@triggerOutputs()?['headers']['x-ms-file-name']",
+            "body": "@outputs('Get_file_content')?['body']"
+          }
+        },
+        "runAfter": {
+          "Get_file_content": ["Succeeded"]
+        }
+      },
+      "Delete_file_from_SFTP": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@appsetting('sftp_connection_name')"
+            }
+          },
+          "method": "delete",
+          "path": "/datasets/default/files/@{triggerOutputs()?['headers']['x-ms-file-id']}"
+        },
+        "runAfter": {
+          "Upload_to_SharePoint": ["Succeeded"]
+        }
+      }
+    },
+    "triggers": {
+      "When_a_file_is_added_or_modified": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@appsetting('sftp_connection_name')"
+            }
+          },
+          "method": "get",
+          "path": "/datasets/default/triggers/onupdatedfile"
+        },
+        "recurrence": {
+          "frequency": "Minute",
+          "interval": 5
+        },
+        "splitOn": "@triggerOutputs()?['body']"
+      }
+    },
+    "contentVersion": "1.0.0.0"
+  },
+  "kind": "Stateful"
+}

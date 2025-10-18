@@ -1,0 +1,301 @@
+# Azure Container Apps Deployment Guide
+
+## Prerequisites
+- Azure CLI installed
+- Docker installed
+- Azure subscription
+- Azure Container Registry (ACR)
+
+## Step 1: Project Setup
+
+Create the following project structure:
+```
+express-mongo-crud/
+├── src/
+│   └── index.ts
+├── package.json
+├── tsconfig.json
+├── Dockerfile
+├── .dockerignore
+└── .env.example
+```
+
+## Step 2: Install Dependencies
+
+```bash
+npm install
+```
+
+## Step 3: Build and Test Locally
+
+### Using Docker Compose (Recommended for local testing)
+
+Create `docker-compose.yml`:
+```yaml
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/cruddb
+    depends_on:
+      - mongo
+  
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
+```
+
+Run locally:
+```bash
+docker-compose up
+```
+
+## Step 4: Azure Setup
+
+### Login to Azure
+```bash
+az login
+```
+
+### Create Resource Group
+```bash
+az group create --name rg-crud-app --location eastus
+```
+
+### Create Azure Container Registry
+```bash
+az acr create \
+  --resource-group rg-crud-app \
+  --name <your-acr-name> \
+  --sku Basic \
+  --admin-enabled true
+```
+
+### Create Azure Cosmos DB for MongoDB
+```bash
+az cosmosdb create \
+  --name <your-cosmosdb-name> \
+  --resource-group rg-crud-app \
+  --kind MongoDB \
+  --server-version 4.2 \
+  --default-consistency-level Eventual \
+  --locations regionName=eastus failoverPriority=0
+```
+
+### Get MongoDB Connection String
+```bash
+az cosmosdb keys list \
+  --name <your-cosmosdb-name> \
+  --resource-group rg-crud-app \
+  --type connection-strings \
+  --query "connectionStrings[0].connectionString" -o tsv
+```
+
+## Step 5: Build and Push Docker Image
+
+### Build the image
+```bash
+docker build -t express-mongo-crud:latest .
+```
+
+### Login to ACR
+```bash
+az acr login --name <your-acr-name>
+```
+
+### Tag the image
+```bash
+docker tag express-mongo-crud:latest <your-acr-name>.azurecr.io/express-mongo-crud:latest
+```
+
+### Push to ACR
+```bash
+docker push <your-acr-name>.azurecr.io/express-mongo-crud:latest
+```
+
+## Step 6: Create Container Apps Environment
+
+```bash
+az containerapp env create \
+  --name crud-app-env \
+  --resource-group rg-crud-app \
+  --location eastus
+```
+
+## Step 7: Deploy to Azure Container Apps
+
+```bash
+az containerapp create \
+  --name express-crud-app \
+  --resource-group rg-crud-app \
+  --environment crud-app-env \
+  --image <your-acr-name>.azurecr.io/express-mongo-crud:latest \
+  --target-port 3000 \
+  --ingress external \
+  --registry-server <your-acr-name>.azurecr.io \
+  --query properties.configuration.ingress.fqdn \
+  --env-vars "MONGODB_URI=<your-mongodb-connection-string>" "PORT=3000"
+```
+
+### Get ACR credentials (if needed)
+```bash
+az acr credential show --name <your-acr-name>
+```
+
+### Deploy with ACR credentials
+```bash
+az containerapp create \
+  --name express-crud-app \
+  --resource-group rg-crud-app \
+  --environment crud-app-env \
+  --image <your-acr-name>.azurecr.io/express-mongo-crud:latest \
+  --target-port 3000 \
+  --ingress external \
+  --registry-server <your-acr-name>.azurecr.io \
+  --registry-username <acr-username> \
+  --registry-password <acr-password> \
+  --secrets mongodb-uri=<your-mongodb-connection-string> \
+  --env-vars "MONGODB_URI=secretref:mongodb-uri" "PORT=3000" \
+  --cpu 0.5 \
+  --memory 1.0Gi \
+  --min-replicas 1 \
+  --max-replicas 3
+```
+
+## Step 8: Get Application URL
+
+```bash
+az containerapp show \
+  --name express-crud-app \
+  --resource-group rg-crud-app \
+  --query properties.configuration.ingress.fqdn -o tsv
+```
+
+## Testing the API
+
+Once deployed, test your endpoints:
+
+```bash
+# Health check
+curl https://<your-app-url>/health
+
+# Create item
+curl -X POST https://<your-app-url>/api/items \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test Item","description":"Test Description","price":99.99,"quantity":10}'
+
+# Get all items
+curl https://<your-app-url>/api/items
+
+# Get single item
+curl https://<your-app-url>/api/items/<item-id>
+
+# Update item
+curl -X PUT https://<your-app-url>/api/items/<item-id> \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Updated Item","description":"Updated Description","price":149.99,"quantity":5}'
+
+# Delete item
+curl -X DELETE https://<your-app-url>/api/items/<item-id>
+```
+
+## Monitoring and Logs
+
+### View logs
+```bash
+az containerapp logs show \
+  --name express-crud-app \
+  --resource-group rg-crud-app \
+  --follow
+```
+
+### View metrics
+```bash
+az monitor metrics list \
+  --resource <container-app-resource-id> \
+  --metric-names "Requests,CPUUsage,MemoryWorkingSetBytes"
+```
+
+## Update Deployment
+
+When you make changes:
+
+```bash
+# Build new image
+docker build -t express-mongo-crud:v2 .
+
+# Tag and push
+docker tag express-mongo-crud:v2 <your-acr-name>.azurecr.io/express-mongo-crud:v2
+docker push <your-acr-name>.azurecr.io/express-mongo-crud:v2
+
+# Update container app
+az containerapp update \
+  --name express-crud-app \
+  --resource-group rg-crud-app \
+  --image <your-acr-name>.azurecr.io/express-mongo-crud:v2
+```
+
+## Clean Up Resources
+
+```bash
+az group delete --name rg-crud-app --yes --no-wait
+```
+
+## Alternative: Using GitHub Actions for CI/CD
+
+Create `.github/workflows/deploy.yml`:
+
+```yaml
+name: Build and Deploy to Azure Container Apps
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  ACR_NAME: <your-acr-name>
+  RESOURCE_GROUP: rg-crud-app
+  CONTAINER_APP_NAME: express-crud-app
+  IMAGE_NAME: express-mongo-crud
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Build and push image
+      run: |
+        az acr build --registry ${{ env.ACR_NAME }} \
+          --image ${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          --image ${{ env.IMAGE_NAME }}:latest .
+    
+    - name: Deploy to Container Apps
+      run: |
+        az containerapp update \
+          --name ${{ env.CONTAINER_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --image ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+```
+
+## Notes
+
+- Replace `<your-acr-name>`, `<your-cosmosdb-name>`, and `<your-mongodb-connection-string>` with your actual values
+- The Cosmos DB connection string includes credentials - store it securely
+- Consider using Azure Key Vault for secrets in production
+- Enable monitoring and Application Insights for better observability
+- Configure auto-scaling based on your needs

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2019-05-01/workflowDefinition.json#",
+  "actions": {
+    "Get_file_content": {
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['sftp']['connectionId']"
+          }
+        },
+        "method": "get",
+        "path": "/datasets/default/files/@{triggerOutputs()?['headers']['x-ms-file-id']}/content"
+      },
+      "runAfter": {},
+      "type": "ApiConnection"
+    },
+    "Upload_to_SharePoint": {
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+          }
+        },
+        "method": "post",
+        "path": "/datasets/default/files",
+        "body": {
+          "folderPath": "/Shared Documents",
+          "name": "@triggerOutputs()?['headers']['x-ms-file-name']",
+          "body": "@outputs('Get_file_content')?['body']"
+        }
+      },
+      "runAfter": {
+        "Get_file_content": ["Succeeded"]
+      },
+      "type": "ApiConnection"
+    },
+    "Delete_file_from_SFTP": {
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['sftp']['connectionId']"
+          }
+        },
+        "method": "delete",
+        "path": "/datasets/default/files/@{triggerOutputs()?['headers']['x-ms-file-id']}"
+      },
+      "runAfter": {
+        "Upload_to_SharePoint": ["Succeeded"]
+      },
+      "type": "ApiConnection"
+    }
+  },
+  "parameters": {
+    "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+    }
+  },
+  "triggers": {
+    "When_a_file_is_added_or_modified": {
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['sftp']['connectionId']"
+          }
+        },
+        "method": "get",
+        "path": "/datasets/default/triggers/onupdatedfile"
+      },
+      "recurrence": {
+        "frequency": "Minute",
+        "interval": 5
+      },
+      "splitOn": "@triggerOutputs()?['body']",
+      "type": "ApiConnection"
+    }
+  }
+}

@@ -6,6 +6,9 @@ resource "azurerm_api_management" "product_api_m" {
   sku_name            = "Consumption_0"
   publisher_name      = "Jayakumar Jayaraman"
   publisher_email     = var.publisher_email
+  sign_in {
+    enabled = true
+  }
 }
 
 resource "azurerm_api_management_api" "product_api" {
@@ -79,9 +82,9 @@ resource "azurerm_api_management_api_operation" "product_api_getbyid" {
   description         = "This API is used to get a product by id"
   url_template        = "/getbyid/{id}"
   template_parameter {
-    name = "id"
+    name     = "id"
     required = true
-    type = "string"
+    type     = "string"
   }
 
   response {

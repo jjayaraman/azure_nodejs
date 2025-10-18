@@ -1,0 +1,30 @@
+services:
+  app:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    environment:
+      - PORT=3000
+      - MONGODB_URI=mongodb://mongodb:27017/cruddb
+    command: sh -c "npm ci && npm run dev"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+    networks:
+      - webnet
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongodb-data:/data/db
+    networks:
+      - webnet
+
+networks:
+  webnet:
+    driver: bridge
