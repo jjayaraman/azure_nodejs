@@ -167,3 +167,5 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+### MongoDb Volume ###
+.data

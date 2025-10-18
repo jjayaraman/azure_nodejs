@@ -21,7 +21,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./mongodb-data:/data/db
+      - ./.data:/data/db
     networks:
       - webnet
 
