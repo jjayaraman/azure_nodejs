@@ -1,4 +1,13 @@
 services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./.data:/data/db
+    networks:
+      - webnet
+
   app:
     image: node:20-alpine
     working_dir: /app
@@ -7,21 +16,12 @@ services:
       - /app/node_modules
     environment:
       - PORT=3000
-      - MONGODB_URI=mongodb://mongodb:27017/cruddb
+      - MONGODB_URI=mongodb://mongo:27017/jaydb
     command: sh -c "npm ci && npm run dev"
     ports:
       - "3000:3000"
     depends_on:
-      - mongodb
-    networks:
-      - webnet
-
-  mongodb:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - ./.data:/data/db
+      - mongo
     networks:
       - webnet
 
